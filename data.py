@@ -2,11 +2,25 @@ import numpy as np
 import pandas as pd
 import os 
 import nltk
-from collections import OrderedDict
-from operator import itemgetter
 import itertools
+import torch
+from torch.utils.data import Dataset
 from nltk import word_tokenize
 # nltk.download('punkt')
+
+
+class TwitterDataset(Dataset):
+    def __init__(self,x,y):
+        pass
+
+    def __getitem__(self,idx):
+        pass
+
+    def __len__(self):
+        pass
+
+
+
 
 def create_vocab(path,vocab_len = 5000):
     f = open(path, "r")
