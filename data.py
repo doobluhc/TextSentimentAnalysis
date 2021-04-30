@@ -11,13 +11,14 @@ from nltk import word_tokenize
 
 class TwitterDataset(Dataset):
     def __init__(self,x,y):
-        pass
+        self.data = x
+        self.label = y
 
     def __getitem__(self,idx):
-        pass
+        return self.data[idx],self.label[idx]
 
     def __len__(self):
-        pass
+        return len(self.data)
 
 
 
@@ -41,6 +42,34 @@ def create_vocab(path,vocab_len = 5000):
             f.write(word + "\n")
 
     print ("vocab saved to vocabulary.txt")
+
+
+def load_traindata(data_path="dataset/training_label.txt"):
+    with open(data_path, 'r') as f:
+        lines = f.readlines()
+        lines = [line.strip('\n').split(' ') for line in lines]
+    x = [line[2:] for line in lines]
+    y = [line[0] for line in lines]
+    #TODO encode based on vocab
+    return x, y
+
+
+def load_traindata_nolabel(data_path="dataset/training_nolabel.txt"):
+    with open(data_path, 'r') as f:
+        lines = f.readlines()
+    x = [line.strip('\n').split(' ') for line in lines]
+    #TODO encode based on vocab
+    return x
+
+
+def load_testingdata(data_path="dataset/testing_data.txt"):
+    with open(data_path,'r') as f:
+        lines = f.readlines()
+        lines = [line.strip('\n').split(',') for line in lines]
+    x = [line[1:] for line in lines]
+    y = [line[0] for line in lines]
+    #TODO encode based on vocab
+    return x, y
     
 
 

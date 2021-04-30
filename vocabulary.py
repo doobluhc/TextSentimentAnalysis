@@ -2,10 +2,10 @@ class Vocabulary:
     
     UNKNOWN_TOKEN = "<unk>"
     
-    def __init__(self, vocabulary_file):
+    def __init__(self, vocabulary_file="vocabulary.txt"):
         with open(vocabulary_file) as f:
             # remove newline character after each word
-            self.words = [line.strip() for line in f.readlines()]
+            self.words = [line.strip("\n") for line in f.readlines()]
 
         self.word2idx_dict = {word:index for index, word in enumerate(self.words)}
         self.size = len(self.words)
@@ -19,3 +19,6 @@ class Vocabulary:
             return self.word2idx_dict[word]
         else:
             return self.word2idx_dict[self.UNKNOWN_TOKEN]
+
+
+    

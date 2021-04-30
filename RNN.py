@@ -2,23 +2,33 @@ import numpy
 import torch
 import pytorch_lightning as pl 
 import torch.nn as nn
+from vocabulary import Vocabulary
+from torch.utils.data import DataLoader
+from data import TwitterDataset,load_traindata,load_traindata_nolabel
 
 class RNN(pl.LightningModule):
     
-    def __init__(self,vocab_len,embedding_size=100,hidden_size=32):
+    def __init__(self,vocab_len=5000,embedding_size=100,hidden_size=32,batch_size=32):
        
+        #constants
+        self.vocab_len = vocab_len
+        self.embedding_size = embedding_size
+        self.hidden_size = hidden_size
+        self.batch_size = batch_size
+
         # model architecture
-        self.embedding = nn.Embedding(vocab_len,embedding_size)
-        self.LSTM = nn.LSTM(embedding_size,hidden_size,num_layers=3)
-        self.dense1 = nn.Linear(hidden_size,16)
+        self.embedding = nn.Embedding(self.vocab_len,self.embedding_size)
+        self.LSTM = nn.LSTM(self.embedding_size,self.hidden_size,num_layers=3)
+        self.dense1 = nn.Linear(self.hidden_size,16)
         self.dense2 = nn.Linear(16,2)
        
         #activation       
         self.leaky_relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(0.5)
+        self.sigmoid = nn.Sigmoid()
         
         #criterion
-        self.criterion = nn.CrossEntropyLoss
+        self.criterion = nn.BCELoss
     
     def forward(self,x):
         
@@ -35,24 +45,37 @@ class RNN(pl.LightningModule):
         output = self.dropout(self.leaky_relu(self.dense1(output)))
         output = self.dropout(self.leaky_relu(self.dense2(output)))
 
-        return output
+        return self.sigmoid(output)
 
     
     def train_dataloader(self):
-         pass
-
+        x,y = load_traindata()
+        train_dataset = TwitterDataset(x[20001:],y[20001:])
+        train_dataloader = DataLoader(train_dataset,batch_size=self.batch_size,shuffle=True,num_workers=1)
+        return train_dataloader
     
     def val_dataloader(self):
-        pass
+        x,y = load_traindata()
+        val_dataset = TwitterDataset(x[0:20000],y[0:20000])
+        val_dataloader = DataLoader(val_dataset,batch_size=self.batch_size,shuffle=True,num_workers=1)
+        return val_dataloader
 
 
     def training_step(self,batch,batch_idx):
-        
-        x,y = batch
-        
-        #getting predictions
+        x,y = batch 
         preds = self(x)
+        loss = self.criterion(preds,y)
+        return loss
 
 
     def validation_step(self,batch,batch_idx):
-        pass
+        x,y = batch 
+        preds = self(x)
+        loss = self.criterion(preds,y)
+        return loss
+
+
+if __name__ == '__main__':
+    model = RNN()
+    trainer = pl.Trainer(fast_dev_run=True)
+    trainer.fit(model)
