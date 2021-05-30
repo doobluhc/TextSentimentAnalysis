@@ -6,6 +6,7 @@ import itertools
 import torch
 from torch.utils.data import Dataset
 from nltk import word_tokenize
+from vocabulary import Vocabulary
 # nltk.download('punkt')
 
 
@@ -19,10 +20,7 @@ class TwitterDataset(Dataset):
 
     def __len__(self):
         return len(self.data)
-
-
-
-
+        
 def create_vocab(path,vocab_len = 5000):
     f = open(path, "r")
     wordfreq = {}
@@ -49,8 +47,8 @@ def load_traindata(data_path="dataset/training_label.txt"):
         lines = f.readlines()
         lines = [line.strip('\n').split(' ') for line in lines]
     x = [line[2:] for line in lines]
+    x = preprocess(x)
     y = [line[0] for line in lines]
-    #TODO encode based on vocab
     return x, y
 
 
@@ -71,7 +69,15 @@ def load_testingdata(data_path="dataset/testing_data.txt"):
     #TODO encode based on vocab
     return x, y
     
-
+def preprocess(x):
+    vocab = Vocabulary()
+    max_len = max([len(word) for word in x]) 
+    encoded_x = torch.zeros((len(x),max_len,vocab.size))
+    for row,sentence in enumerate(x):
+        for idx,word in enumerate(sentence):
+            encoded_x[row,] = vocab.word2idx(word)
+        encoded_x.append(encoded_word)
 
 if __name__ == '__main__':
-    create_vocab((os.path.join("dataset","training_nolabel.txt")))
+    # create_vocab((os.path.join("dataset","training_nolabel.txt")))
+    load_traindata()

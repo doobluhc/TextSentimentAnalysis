@@ -18,7 +18,7 @@ class RNN(pl.LightningModule):
 
         # model architecture
         self.embedding = nn.Embedding(self.vocab_len,self.embedding_size)
-        self.LSTM = nn.LSTM(self.embedding_size,self.hidden_size,num_layers=3)
+        self.LSTM = nn.LSTM(self.embedding_size,self.hidden_size,num_layers=3,batch_first=True)
         self.dense1 = nn.Linear(self.hidden_size,16)
         self.dense2 = nn.Linear(16,2)
        
